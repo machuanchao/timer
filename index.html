@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="计时器">
+    <meta name="theme-color" content="#f7f3ec" />
+    <title>计时器</title>
+
+    <!-- PWA Manifest -->
+    <script>
+        const manifest = {
+            "name": "计时器",
+            "short_name": "计时器",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#f7f3ec",
+            "theme_color": "#f7f3ec",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect rx='24' width='192' height='192' fill='%23f7f3ec'/><text x='96' y='116' font-size='96' text-anchor='middle'>⏱️</text></svg>",
+                    "sizes": "192x192",
+                    "type": "image/svg+xml"
+                },
+                {
+                    "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect rx='64' width='512' height='512' fill='%23f7f3ec'/><text x='256' y='308' font-size='256' text-anchor='middle'>⏱️</text></svg>",
+                    "sizes": "512x512",
+                    "type": "image/svg+xml"
+                }
+            ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        document.head.insertAdjacentHTML('beforeend',`<link rel="manifest" href="${URL.createObjectURL(blob)}">`);
+    </script>
+
+    <!-- iOS桌面图标 -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect rx='24' width='192' height='192' fill='%23f7f3ec'/><text x='96' y='116' font-size='96' text-anchor='middle'>⏱️</text></svg>">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            min-height: 100vh;
+            width: 100%;
+            font-family: "DIN Alternate", "Arial Narrow", system-ui, sans-serif;
+            color: #3d3530;
+            overflow: hidden;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 30%, #fffaf2 0%, #f7f3ec 40%, #ece4d6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .timer {
+            width: 100%;
+            max-width: 340px;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 26px 22px 24px;
+            box-shadow: 0 18px 40px rgba(120, 90, 40, 0.18),
+                        0 6px 14px rgba(120, 90, 40, 0.12),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            border: 1px solid #e6dfd1;
+        }
+
+        .timer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .title {
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: #a59376;
+            text-transform: uppercase;
+        }
+
+        .status-light {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #ff8a65;
+            box-shadow: 0 0 8px rgba(255, 138, 101, 0.55);
+        }
+
+        .display {
+            background: #fbf9f4;
+            border-radius: 20px;
+            padding: 26px 14px;
+            text-align: center;
+            border: 1px solid #ebe3d2;
+            box-shadow: inset 0 4px 12px rgba(120, 90, 40, 0.08),
+                        inset 0 0 0 2px #fff;
+            margin-bottom: 20px;
+        }
+
+        .mode {
+            font-size: 13px;
+            color: #b59468;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        #timerBox {
+            font-size: 84px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            color: #5a6b4f;
+            text-shadow: 0 2px 6px rgba(90, 107, 79, 0.12);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .action {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px 0;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(180deg, #ffb088 0%, #ef8454 100%);
+            box-shadow: 0 8px 18px rgba(239, 132, 84, 0.35),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.25),
+                        inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+            transition: transform 0.05s ease;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(239, 132, 84, 0.35),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 12px;
+            color: #a59376;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer">
+        <div class="timer-header">
+            <div class="title">TIMER</div>
+            <div class="status-light"></div>
+        </div>
+        <div class="display">
+            <div class="mode">RUNNING</div>
+            <div id="timerBox"></div>
+        </div>
+        <div class="action">
+            <button class="btn" id="resetBtn">重置</button>
+        </div>
+        <div class="footer">⏱️ 半小时倒计时</div>
+    </div>
+
+    <script>
+        // Service Worker，用于PWA离线
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+            `;
+            const blobSW = new Blob([swCode], {type:"application/javascript"});
+            navigator.serviceWorker.register(URL.createObjectURL(blobSW)).catch(()=>{});
+        }
+
+        let endTs;
+        const timerBox = document.getElementById('timerBox');
+        const resetBtn = document.getElementById('resetBtn');
+        const modeText = document.querySelector('.mode');
+        const COUNT_DOWN_TIME = 30 * 60 * 1000; // 固定半小时
+
+        // 读取本地保存的计时结束时间
+        const savedEnd = localStorage.getItem('timerEnd');
+        if (savedEnd) {
+            endTs = Number(savedEnd);
+        } else {
+            endTs = Date.now() + COUNT_DOWN_TIME;
+            localStorage.setItem('timerEnd', endTs);
+        }
+
+        // 格式化时间 分:秒
+        function formatTime(ms) {
+            if (ms <= 0) return "时间到";
+            const totalSec = Math.floor(ms / 1000);
+            const min = Math.floor(totalSec / 60);
+            const sec = totalSec % 60;
+            return `${min}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        // 更新倒计时
+        function updateTimer() {
+            const now = Date.now();
+            const remainMs = endTs - now;
+
+            if (remainMs <= 0) {
+                timerBox.textContent = "时间到";
+                modeText.textContent = "FINISHED";
+                return;
+            }
+            timerBox.textContent = formatTime(remainMs);
+            modeText.textContent = "RUNNING";
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+
+        // 重置按钮，重新开启半小时倒计时
+        resetBtn.addEventListener('click', () => {
+            endTs = Date.now() + COUNT_DOWN_TIME;
+            localStorage.setItem('timerEnd', endTs);
+            updateTimer();
+        });
+
+        // 页面切回来的时候刷新一次时间
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                updateTimer();
+            }
+        });
+    </script>
+</body>
+</html>
